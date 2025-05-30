@@ -18,20 +18,19 @@ public class WeeklyBoss {
     private String bossName;
 
     @Column(name = "party_size", nullable = false)
-    private String partySize;
+    private int partySize;
 
     @Column(name = "crystal_value", nullable = false)
-    private String crystalValue;
+    private Long crystalValue;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "weekly_character_id")
     private WeeklyCharacter weeklyCharacter;
 
     public WeeklyBoss() {
-
     }
 
-    public WeeklyBoss(Long id, String bossName, String partySize, String crystalValue, WeeklyCharacter weeklyCharacter) {
+    public WeeklyBoss(Long id, String bossName, int partySize, Long crystalValue, WeeklyCharacter weeklyCharacter) {
         this.id = id;
         this.bossName = bossName;
         this.partySize = partySize;
@@ -55,19 +54,19 @@ public class WeeklyBoss {
         this.bossName = bossName;
     }
 
-    public String getPartySize() {
+    public int getPartySize() {
         return partySize;
     }
 
-    public void setPartySize(String partySize) {
+    public void setPartySize(int partySize) {
         this.partySize = partySize;
     }
 
-    public String getCrystalValue() {
+    public Long getCrystalValue() {
         return crystalValue;
     }
 
-    public void setCrystalValue(String crystalValue) {
+    public void setCrystalValue(Long crystalValue) {
         this.crystalValue = crystalValue;
     }
 
