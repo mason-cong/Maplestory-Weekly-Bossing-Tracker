@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface WeeklyCharacterRepository extends JpaRepository<WeeklyCharacter, Long> {
     List<WeeklyCharacter> findByUserId(Long userId);
     Optional<WeeklyCharacter> findByUserIdAndId(Long userId, Long weeklyCharacterId);
+    void deleteByUserIdAndId(Long userId, Long weeklyCharacterId);
+
 }

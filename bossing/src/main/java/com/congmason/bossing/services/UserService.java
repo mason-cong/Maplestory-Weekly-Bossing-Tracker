@@ -10,4 +10,6 @@ import java.util.List;
 public interface UserService extends UserDetailsService {
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    User registerUser(User user) throws Exception;
+    User loginUser(User user);
 }

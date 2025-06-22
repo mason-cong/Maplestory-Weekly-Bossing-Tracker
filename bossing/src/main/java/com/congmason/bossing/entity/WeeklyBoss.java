@@ -11,7 +11,7 @@ public class WeeklyBoss {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bossing_id")
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "boss_name", nullable = false)

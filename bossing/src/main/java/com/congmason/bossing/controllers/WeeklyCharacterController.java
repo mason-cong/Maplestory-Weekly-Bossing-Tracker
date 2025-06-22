@@ -30,28 +30,33 @@ public class WeeklyCharacterController {
     }
 
     @PostMapping
-    public WeeklyCharacterDto createWeeklyCharacter(@RequestBody WeeklyCharacterDto weeklyCharacterDto) {
-        WeeklyCharacter createdWeeklyCharacter = weeklyCharacterService.createWeeklyCharacter(
+    public WeeklyCharacterDto createWeeklyCharacter(@PathVariable("user_id")Long userId, @RequestBody WeeklyCharacterDto weeklyCharacterDto) {
+        WeeklyCharacter createdWeeklyCharacter = weeklyCharacterService.createWeeklyCharacter(userId,
                 weeklyCharacterMapper.fromDto(weeklyCharacterDto)
         );
         return weeklyCharacterMapper.toDto(createdWeeklyCharacter);
     }
 
     @GetMapping(path = "/{weekly_character_id}")
-    public Optional<WeeklyCharacterDto> getWeeklyCharacter(@PathVariable("weekly_character_id") Long id) {
-        return weeklyCharacterService.getWeeklyCharacter(id).map(weeklyCharacterMapper::toDto);
+    public Optional<WeeklyCharacterDto> getWeeklyCharacter(@PathVariable("user_id") Long userId, @PathVariable("weekly_character_id") Long id) {
+        return weeklyCharacterService.getWeeklyCharacter(userId, id)
+                .map(weeklyCharacterMapper::toDto);
     }
 
     @PutMapping(path = "/{weekly_character_id}")
-    public WeeklyCharacterDto updateWeeklyCharacter(@PathVariable("weekly_character_id") Long id, @RequestBody WeeklyCharacterDto weeklyCharacterDto) {
-        WeeklyCharacter updatedWeeklyCharacter = weeklyCharacterService.updateWeeklyCharacter(id, weeklyCharacterMapper.fromDto(weeklyCharacterDto));
+    public WeeklyCharacterDto updateWeeklyCharacter(@PathVariable("user_id") Long userId,
+                                                    @PathVariable("weekly_character_id") Long id,
+                                                    @RequestBody WeeklyCharacterDto weeklyCharacterDto) {
+
+        WeeklyCharacter updatedWeeklyCharacter = weeklyCharacterService.updateWeeklyCharacter(userId, id, weeklyCharacterMapper.fromDto(weeklyCharacterDto));
 
         return weeklyCharacterMapper.toDto(updatedWeeklyCharacter);
     }
 
     @DeleteMapping(path = "/{weekly_character_id}")
-    public void deleteWeeklyCharacter(@PathVariable("weekly_character_id") Long id) {
-        weeklyCharacterService.deleteWeeklyCharacter(id);
+    public void deleteWeeklyCharacter(@PathVariable("user_id") Long userId,
+                                      @PathVariable("weekly_character_id") Long id) {
+        weeklyCharacterService.deleteWeeklyCharacter(userId, id);
     }
 
 }
