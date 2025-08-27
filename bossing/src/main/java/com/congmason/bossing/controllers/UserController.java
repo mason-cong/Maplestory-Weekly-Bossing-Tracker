@@ -5,6 +5,7 @@ import com.congmason.bossing.entity.User;
 import com.congmason.bossing.mappers.UserMapper;
 import com.congmason.bossing.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +26,7 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
+    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
     @Autowired
     public UserController(UserService userService, UserMapper userMapper, AuthenticationManager authenticationManager) {
@@ -52,14 +55,26 @@ public class UserController {
         Authentication authenticationResponse =
                 this.authenticationManager.authenticate(authenticationRequest);
 
-        /*SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
+        SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
 
         HttpSession session = request.getSession();
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());*/
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         User returningUser = userService.loginUser(userMapper.fromDto(userDto));
 
         return ResponseEntity.ok(returningUser);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
+        logoutHandler.logout(request, response, authentication);
+
+        request.getSession().removeAttribute("SPRING_SECURITY_CONTEXT");
+        request.getSession().invalidate();
+        SecurityContextHolder.clearContext();
+        return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
+
+
     }
 
 }

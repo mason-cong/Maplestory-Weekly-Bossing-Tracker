@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/weekly-characters")
+@RequestMapping(path = "/weekly-characters/{user_id}")
 public class WeeklyCharacterController {
 
     private final WeeklyCharacterService weeklyCharacterService;
@@ -22,8 +22,8 @@ public class WeeklyCharacterController {
     }
 
     @GetMapping
-    public List<WeeklyCharacterDto> listWeeklyCharacters(Long id) {
-        return weeklyCharacterService.listWeeklyCharacters(id)
+    public List<WeeklyCharacterDto> listWeeklyCharacters(@PathVariable("user_id")Long userId) {
+        return weeklyCharacterService.listWeeklyCharacters(userId)
                 .stream()
                 .map(weeklyCharacterMapper::toDto)
                 .toList();

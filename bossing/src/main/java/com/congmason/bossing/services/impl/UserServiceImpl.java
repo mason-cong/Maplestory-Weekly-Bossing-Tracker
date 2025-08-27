@@ -55,13 +55,23 @@ public class UserServiceImpl implements UserService {
         newUser.setEmail(user.getEmail());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        return userRepository.save(newUser);
     }
 
     @Override
     public User loginUser(User user) {
-        User returnUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        return returnUser;
+        Optional<User> userT = userRepository.findByUsername(user.getUsername());
+
+        if (userT.isPresent()) {
+            var userObj = userT.get();
+
+            return new User(userObj.getId(), userObj.getUsername(), userObj.getEmail(), userObj.getPassword(), null);
+
+        } else {
+            throw new UsernameNotFoundException("user not found");
+        }
+        /*User returnUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        return returnUser;*/
     }
 
 
