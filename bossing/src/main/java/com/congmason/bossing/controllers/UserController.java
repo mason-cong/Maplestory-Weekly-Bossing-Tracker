@@ -1,24 +1,27 @@
 package com.congmason.bossing.controllers;
 
+import com.congmason.bossing.authentication.JwtHelper;
+import com.congmason.bossing.dto.LoginResponse;
 import com.congmason.bossing.dto.UserDto;
 import com.congmason.bossing.entity.User;
 import com.congmason.bossing.mappers.UserMapper;
 import com.congmason.bossing.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -49,20 +52,22 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login (@RequestBody UserDto userDto, HttpServletRequest request) {
+    public ResponseEntity<?> login (@RequestBody UserDto userDto, HttpServletRequest request) {
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.unauthenticated(userDto.username(), userDto.password());
-        Authentication authenticationResponse =
-                this.authenticationManager.authenticate(authenticationRequest);
+        //Authentication authenticationResponse =
+               // this.authenticationManager.authenticate(authenticationRequest);
 
-        SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
+        //SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
 
-        HttpSession session = request.getSession();
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        //HttpSession session = request.getSession();
+        //session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         User returningUser = userService.loginUser(userMapper.fromDto(userDto));
 
-        return ResponseEntity.ok(returningUser);
+        String token = JwtHelper.generateToken(userDto.username());
+
+        return ResponseEntity.ok(new LoginResponse(userDto.username(), token));
     }
 
     @PostMapping("/logout")
@@ -75,6 +80,12 @@ public class UserController {
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
 
 
+    }
+
+    @PostMapping("/userInfo")
+    public ResponseEntity<?> userInfo(@RequestBody UserDto user) throws Exception {
+        Long currentUserId = userService.findByUsername(user.username());
+        return ResponseEntity.ok(currentUserId);
     }
 
 }

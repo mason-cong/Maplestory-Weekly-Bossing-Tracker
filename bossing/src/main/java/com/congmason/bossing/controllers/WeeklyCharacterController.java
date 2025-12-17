@@ -59,4 +59,9 @@ public class WeeklyCharacterController {
         weeklyCharacterService.deleteWeeklyCharacter(userId, id);
     }
 
+    @GetMapping(path = "/{weekly_character_id}/meso")
+    public Long getWeeklyCharacterMeso(@PathVariable("user_id") Long userId, @PathVariable("weekly_character_id") Long id) {
+        return weeklyCharacterService.weeklyCharacterMeso(userId, id);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.congmason.bossing.security;
 
+import com.congmason.bossing.authentication.JwtAuthFilter;
 import com.congmason.bossing.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,10 +29,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
     private final UserService userService;
 
     @Autowired
-    public SecurityConfig(@Lazy UserService userService) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, @Lazy UserService userService) {
+        this.jwtAuthFilter = jwtAuthFilter;
         this.userService = userService;
     }
 
@@ -49,7 +53,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(forms -> forms.disable())
                 .authorizeHttpRequests((registry) -> registry
                     .requestMatchers("/signup").permitAll()
@@ -58,6 +62,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(s -> s
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
     }

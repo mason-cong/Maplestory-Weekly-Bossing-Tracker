@@ -45,6 +45,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Long findByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            var userObj = user.get();
+            return userObj.getId();
+
+        } else {
+            throw new UsernameNotFoundException("user not found");
+        }
+
+    }
+
+    @Override
     public User registerUser(User user) throws Exception {
 
         if (userRepository.existsByUsername(user.getEmail())) {

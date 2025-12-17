@@ -7,6 +7,7 @@ public record WeeklyCharacterDto(
         String characterClass,
         String characterLevel,
         String characterName,
+        Long characterMeso,
         List<WeeklyBossDto> weeklyBosses
 ) {
 }

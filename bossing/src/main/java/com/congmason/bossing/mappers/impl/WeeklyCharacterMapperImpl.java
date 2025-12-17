@@ -24,6 +24,7 @@ public class WeeklyCharacterMapperImpl implements WeeklyCharacterMapper {
                 weeklyCharacterDto.characterClass(),
                 weeklyCharacterDto.characterLevel(),
                 weeklyCharacterDto.characterName(),
+                weeklyCharacterDto.characterMeso(),
                 null,
                 Optional.ofNullable(weeklyCharacterDto.weeklyBosses())
                         .map(weeklyBosses -> weeklyBosses.stream()
@@ -39,6 +40,7 @@ public class WeeklyCharacterMapperImpl implements WeeklyCharacterMapper {
                 weeklyCharacter.getCharacterClass(),
                 weeklyCharacter.getCharacterLevel(),
                 weeklyCharacter.getCharacterName(),
+                weeklyCharacter.getMeso(),
                 Optional.ofNullable(weeklyCharacter.getWeeklyBosses())
                         .map(weeklyBosses -> weeklyBosses.stream()
                                 .map(bossMapper::toDto)

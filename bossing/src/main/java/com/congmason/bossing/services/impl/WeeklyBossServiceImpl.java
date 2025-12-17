@@ -92,4 +92,14 @@ public class WeeklyBossServiceImpl implements WeeklyBossService {
         return calculatedCrystalValue;
     }
 
+    private Long weeklyTotalMesoCalculator(Long weeklyCharacterId) {
+        List<WeeklyBoss> bosses = bossRepository.findByWeeklyCharacterId(weeklyCharacterId);
+        Long weeklyTotal = 0L;
+
+        for (WeeklyBoss boss: bosses) {
+            weeklyTotal += boss.getCrystalValue();
+        }
+
+        return weeklyTotal;
+    }
 }

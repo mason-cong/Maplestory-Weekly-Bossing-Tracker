@@ -1,7 +1,7 @@
 package com.congmason.bossing.services.impl;
 
 import com.congmason.bossing.entity.User;
-import com.congmason.bossing.entity.WeeklyBossesValues;
+import com.congmason.bossing.entity.WeeklyBoss;
 import com.congmason.bossing.entity.WeeklyCharacter;
 import com.congmason.bossing.repository.UserRepository;
 import com.congmason.bossing.repository.WeeklyCharacterRepository;
@@ -47,6 +47,7 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
             throw new IllegalArgumentException("Character class is required");
         }
 
+
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user id entered"));
 
@@ -55,6 +56,7 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
                 weeklyCharacter.getCharacterClass(),
                 weeklyCharacter.getCharacterLevel(),
                 weeklyCharacter.getCharacterName(),
+                weeklyCharacter.getMeso(),
                 currentUser,
                null
         ));
@@ -83,6 +85,7 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
         updatedWeeklyCharacter.setCharacterLevel(weeklyCharacter.getCharacterLevel());
         updatedWeeklyCharacter.setCharacterClass(weeklyCharacter.getCharacterClass());
         updatedWeeklyCharacter.setCharacterName(weeklyCharacter.getCharacterName());
+        updatedWeeklyCharacter.setMeso(weeklyCharacterMeso(userId, characterId));
 
         return weeklyCharacterRepository.save(updatedWeeklyCharacter);
     }
@@ -93,13 +96,34 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
         weeklyCharacterRepository.deleteByUserIdAndId(userId, weeklyCharacterId);
     }
 
-    //Calculate the total amount of meso that a character earns from completed bosses
-    private Long crystalValueCalculator(String bossName, int partySize) {
-        Long calculatedCrystalValue = 0L;
-        calculatedCrystalValue = WeeklyBossesValues.valueOf(bossName).getCrystalValue()/partySize;
-        //for (WeeklyBoss boss : )
+    @Transactional
+    @Override
+    public void updateWeeklyMesos(Long userId, Long weeklyCharacterId) {
+        WeeklyCharacter character = weeklyCharacterRepository.findByUserIdAndId(userId, weeklyCharacterId).orElseThrow();
+        List<WeeklyBoss> bosses = character.getWeeklyBosses();
+        Long weeklyTotal = 0L;
 
-        return calculatedCrystalValue;
+        for (WeeklyBoss boss: bosses) {
+            weeklyTotal += boss.getCrystalValue();
+        }
+
+        character.setMeso(weeklyTotal);
+        weeklyCharacterRepository.save(character);
+    }
+
+
+    //Calculate the total amount of meso that a character earns from completed bosses
+    @Override
+    public Long weeklyCharacterMeso(Long userId, Long weeklyCharacterId) {
+        WeeklyCharacter character = weeklyCharacterRepository.findByUserIdAndId(userId, weeklyCharacterId).orElseThrow();
+        List<WeeklyBoss> bosses = character.getWeeklyBosses();
+        Long weeklyTotal = 0L;
+
+        for (WeeklyBoss boss: bosses) {
+            weeklyTotal += boss.getCrystalValue();
+        }
+
+        return weeklyTotal;
     }
 
 }
