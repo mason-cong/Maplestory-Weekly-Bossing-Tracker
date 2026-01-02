@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -56,7 +55,7 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
                 weeklyCharacter.getCharacterClass(),
                 weeklyCharacter.getCharacterLevel(),
                 weeklyCharacter.getCharacterName(),
-                weeklyCharacter.getMeso(),
+                0L,
                 currentUser,
                null
         ));
@@ -71,14 +70,6 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
     @Transactional
     @Override
     public WeeklyCharacter updateWeeklyCharacter(Long userId, Long characterId, WeeklyCharacter weeklyCharacter) {
-        if(null == weeklyCharacter.getId()) {
-            throw new IllegalArgumentException("Character must have an ID");
-        }
-
-        if(!Objects.equals(weeklyCharacter.getId(), characterId)) {
-            throw new IllegalArgumentException("CHanging character id is not permitted");
-        }
-
         WeeklyCharacter updatedWeeklyCharacter = weeklyCharacterRepository.findByUserIdAndId(userId, characterId).orElseThrow(() ->
                 new IllegalArgumentException("Character not found"));
 
@@ -86,7 +77,6 @@ public class WeeklyCharacterServiceImpl implements WeeklyCharacterService {
         updatedWeeklyCharacter.setCharacterClass(weeklyCharacter.getCharacterClass());
         updatedWeeklyCharacter.setCharacterName(weeklyCharacter.getCharacterName());
         updatedWeeklyCharacter.setMeso(weeklyCharacterMeso(userId, characterId));
-
         return weeklyCharacterRepository.save(updatedWeeklyCharacter);
     }
 
