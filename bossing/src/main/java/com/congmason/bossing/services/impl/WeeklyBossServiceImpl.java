@@ -60,20 +60,12 @@ public class WeeklyBossServiceImpl implements WeeklyBossService {
     @Transactional
     @Override
     public WeeklyBoss updateBoss(Long weeklyCharacterId, Long bossId, WeeklyBoss boss) {
-        if(null == boss.getId()) {
-            throw new IllegalArgumentException("Character must have an ID");
-        }
-
-        if(!Objects.equals(boss.getId(), bossId)) {
-            throw new IllegalArgumentException("Changing boss id is not permitted");
-        }
-
         WeeklyBoss updatedBoss = bossRepository.findByWeeklyCharacterIdAndId(weeklyCharacterId, bossId).orElseThrow(() ->
                 new IllegalArgumentException("Boss not found"));
 
         updatedBoss.setPartySize(boss.getPartySize());
         updatedBoss.setBossName(boss.getBossName());
-        updatedBoss.setCrystalValue(boss.getCrystalValue());
+        updatedBoss.setCrystalValue(crystalValueCalculator(boss.getBossName(), boss.getPartySize()));
 
         return bossRepository.save(updatedBoss);
     }
