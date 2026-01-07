@@ -60,9 +60,11 @@ public class WeeklyBossController {
     }
 
     @DeleteMapping(path = "/{boss_id}")
-    public void deleteBoss (@PathVariable("weekly_character_id") Long weeklyCharacterId,
+    public void deleteBoss (@PathVariable("user_id") Long userId,
+                            @PathVariable("weekly_character_id") Long weeklyCharacterId,
                             @PathVariable("boss_id") Long bossId) {
         weeklyBossService.deleteBoss(weeklyCharacterId, bossId);
+        weeklyCharacterService.updateWeeklyMesos(userId, weeklyCharacterId);
     }
 
 }
