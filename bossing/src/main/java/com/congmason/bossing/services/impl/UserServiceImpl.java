@@ -1,20 +1,16 @@
 package com.congmason.bossing.services.impl;
 
-import com.congmason.bossing.dto.UserDto;
 import com.congmason.bossing.entity.User;
 import com.congmason.bossing.repository.UserRepository;
 import com.congmason.bossing.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,7 +50,6 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new UsernameNotFoundException("user not found");
         }
-
     }
 
     @Override
@@ -83,9 +78,16 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new UsernameNotFoundException("user not found");
         }
-        /*User returnUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        return returnUser;*/
     }
 
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElse(null);
+    }
 
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }

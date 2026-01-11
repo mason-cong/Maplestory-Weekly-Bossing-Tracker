@@ -15,13 +15,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -55,13 +53,6 @@ public class UserController {
     public ResponseEntity<?> login (@RequestBody UserDto userDto, HttpServletRequest request) {
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.unauthenticated(userDto.username(), userDto.password());
-        //Authentication authenticationResponse =
-               // this.authenticationManager.authenticate(authenticationRequest);
-
-        //SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
-
-        //HttpSession session = request.getSession();
-        //session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         User returningUser = userService.loginUser(userMapper.fromDto(userDto));
 

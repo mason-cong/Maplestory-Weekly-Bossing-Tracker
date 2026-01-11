@@ -1,7 +1,6 @@
 package com.congmason.bossing.services;
 
 import com.congmason.bossing.entity.WeeklyCharacter;
-import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
