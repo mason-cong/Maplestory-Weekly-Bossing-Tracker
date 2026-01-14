@@ -1,6 +1,7 @@
 package com.congmason.bossing.services;
 
 import com.congmason.bossing.entity.WeeklyBoss;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,4 +12,5 @@ public interface WeeklyBossService {
     Optional<WeeklyBoss> getWeeklyBoss(Long weeklyCharacterId, Long weeklyBossId);
     WeeklyBoss updateBoss(Long weeklyCharacterId, Long bossId, WeeklyBoss boss);
     void deleteBoss(Long weeklyCharacterId, Long weeklyBossId);
+    void clearBosses(Long userId, Long weeklyCharacterId);
 }

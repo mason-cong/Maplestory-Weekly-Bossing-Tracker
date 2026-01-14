@@ -1,13 +1,19 @@
 package com.congmason.bossing.controllers;
 
+import com.congmason.bossing.dto.DuplicateBossRequest;
 import com.congmason.bossing.dto.WeeklyBossDto;
 import com.congmason.bossing.entity.WeeklyBoss;
+import com.congmason.bossing.entity.WeeklyCharacter;
 import com.congmason.bossing.mappers.WeeklyBossMapper;
 import com.congmason.bossing.services.WeeklyBossService;
 import com.congmason.bossing.services.WeeklyCharacterService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -65,6 +71,45 @@ public class WeeklyBossController {
                             @PathVariable("boss_id") Long bossId) {
         weeklyBossService.deleteBoss(weeklyCharacterId, bossId);
         weeklyCharacterService.updateWeeklyMesos(userId, weeklyCharacterId);
+    }
+
+    @PostMapping(path = "/duplicate")
+    @Transactional
+    public ResponseEntity<?> duplicateBosses(
+            @PathVariable("user_id") Long userId,
+            @PathVariable("weekly_character_id") Long targetCharacterId,
+            @RequestBody DuplicateBossRequest request) {
+
+        try {
+            Long sourceCharacterId = request.getWeeklyCharacterId();
+            List<WeeklyBoss> sourceBosses = weeklyBossService.listBosses(sourceCharacterId);
+
+            if (sourceBosses.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No bosses to copy"));
+            }
+
+            if (request.isReplace()) {
+                weeklyBossService.clearBosses(userId, targetCharacterId);
+            }
+
+            List<WeeklyBoss> copiedBosses = new ArrayList<>();
+
+            for (WeeklyBoss sourceBoss : sourceBosses) {
+                WeeklyBoss saved = weeklyBossService.createBoss(targetCharacterId, sourceBoss);
+                copiedBosses.add(saved);
+            }
+            weeklyCharacterService.updateWeeklyMesos(userId, targetCharacterId);
+
+            Optional<WeeklyCharacter> targetCharacter = weeklyCharacterService.getWeeklyCharacter(userId, targetCharacterId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", copiedBosses.size() + " bosses copied",
+                    "character", targetCharacter
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to copy bosses"));
+        }
     }
 
 }

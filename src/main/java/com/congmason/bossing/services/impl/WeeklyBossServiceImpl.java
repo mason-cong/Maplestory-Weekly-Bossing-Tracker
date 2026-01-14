@@ -75,6 +75,13 @@ public class WeeklyBossServiceImpl implements WeeklyBossService {
         bossRepository.deleteByWeeklyCharacterIdAndId(weeklyCharacterId, weeklyBossId);
     }
 
+    @Transactional
+    @Override
+    public void clearBosses(Long userId, Long weeklyCharacterId) {
+        Optional<WeeklyCharacter> updatedCharacter = weeklyCharacterRepository.findByUserIdAndId(userId, weeklyCharacterId);
+            updatedCharacter.get().getWeeklyBosses().clear();
+    }
+
     //When new weekly boss is added to a character, update the crystal value in accordance to boss and party size
     private Long crystalValueCalculator(String bossName, int partySize) {
         Long calculatedCrystalValue = 0L;
