@@ -19,6 +19,7 @@ services:
       EMAIL_USERNAME: ${EMAIL_USERNAME}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       APP_FRONTEND_URL: ${APP_FRONTEND_URL}
+      JWT_SECRET: ${JWT_SECRET}
     command: ["java", "-jar", "app.jar"]
     dns:
       - 8.8.8.8

@@ -26,13 +26,15 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final JwtHelper jwtHelper;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
     @Autowired
-    public UserController(UserService userService, UserMapper userMapper, AuthenticationManager authenticationManager) {
+    public UserController(UserService userService, UserMapper userMapper, JwtHelper jwtHelper, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.userMapper = userMapper;
+        this.jwtHelper = jwtHelper;
         this.authenticationManager = authenticationManager;
     }
 
@@ -56,7 +58,7 @@ public class UserController {
 
         User returningUser = userService.loginUser(userMapper.fromDto(userDto));
 
-        String token = JwtHelper.generateToken(userDto.username());
+        String token = jwtHelper.generateToken(userDto.username());
 
         return ResponseEntity.ok(new LoginResponse(userDto.username(), token));
     }

@@ -80,6 +80,7 @@ public class WeeklyBossServiceImpl implements WeeklyBossService {
     public void clearBosses(Long userId, Long weeklyCharacterId) {
         Optional<WeeklyCharacter> updatedCharacter = weeklyCharacterRepository.findByUserIdAndId(userId, weeklyCharacterId);
             updatedCharacter.get().getWeeklyBosses().clear();
+            updatedCharacter.get().setMeso(0L);
     }
 
     //When new weekly boss is added to a character, update the crystal value in accordance to boss and party size

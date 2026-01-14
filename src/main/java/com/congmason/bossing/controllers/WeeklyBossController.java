@@ -5,8 +5,10 @@ import com.congmason.bossing.dto.WeeklyBossDto;
 import com.congmason.bossing.entity.WeeklyBoss;
 import com.congmason.bossing.entity.WeeklyCharacter;
 import com.congmason.bossing.mappers.WeeklyBossMapper;
+import com.congmason.bossing.mappers.WeeklyCharacterMapper;
 import com.congmason.bossing.services.WeeklyBossService;
 import com.congmason.bossing.services.WeeklyCharacterService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +23,13 @@ import java.util.Optional;
 public class WeeklyBossController {
 
     private final WeeklyCharacterService weeklyCharacterService;
+    private final WeeklyCharacterMapper weeklyCharacterMapper;
     private final WeeklyBossService weeklyBossService;
     private final WeeklyBossMapper weeklyBossMapper;
 
-    public WeeklyBossController(WeeklyCharacterService weeklyCharacterService, WeeklyBossService weeklyBossService, WeeklyBossMapper weeklyBossMapper) {
+    public WeeklyBossController(WeeklyCharacterService weeklyCharacterService, WeeklyCharacterMapper weeklyCharacterMapper, WeeklyBossService weeklyBossService, WeeklyBossMapper weeklyBossMapper) {
         this.weeklyCharacterService = weeklyCharacterService;
+        this.weeklyCharacterMapper = weeklyCharacterMapper;
         this.weeklyBossService = weeklyBossService;
         this.weeklyBossMapper = weeklyBossMapper;
     }
@@ -77,38 +81,50 @@ public class WeeklyBossController {
     @Transactional
     public ResponseEntity<?> duplicateBosses(
             @PathVariable("user_id") Long userId,
-            @PathVariable("weekly_character_id") Long targetCharacterId,
+            @PathVariable("weekly_character_id") Long weeklyCharacterId,
             @RequestBody DuplicateBossRequest request) {
 
         try {
             Long sourceCharacterId = request.getWeeklyCharacterId();
+
+            Optional<WeeklyCharacter> sourceCharacter = weeklyCharacterService.getWeeklyCharacter(userId, sourceCharacterId);
+            if (sourceCharacter.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Source character not found"));
+            }
             List<WeeklyBoss> sourceBosses = weeklyBossService.listBosses(sourceCharacterId);
 
             if (sourceBosses.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "No bosses to copy"));
+                return ResponseEntity.badRequest().body(Map.of("error", "No bosses to copy from source character"));
             }
 
             if (request.isReplace()) {
-                weeklyBossService.clearBosses(userId, targetCharacterId);
+                weeklyBossService.clearBosses(userId, weeklyCharacterId);
             }
 
             List<WeeklyBoss> copiedBosses = new ArrayList<>();
 
             for (WeeklyBoss sourceBoss : sourceBosses) {
-                WeeklyBoss saved = weeklyBossService.createBoss(targetCharacterId, sourceBoss);
+                WeeklyBoss copy = new WeeklyBoss();
+                copy.setBossName(sourceBoss.getBossName());
+                copy.setPartySize(sourceBoss.getPartySize());
+
+                WeeklyBoss saved = weeklyBossService.createBoss(weeklyCharacterId, copy);
                 copiedBosses.add(saved);
             }
-            weeklyCharacterService.updateWeeklyMesos(userId, targetCharacterId);
 
-            Optional<WeeklyCharacter> targetCharacter = weeklyCharacterService.getWeeklyCharacter(userId, targetCharacterId);
+            weeklyCharacterService.updateWeeklyMesos(userId, weeklyCharacterId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", copiedBosses.size() + " bosses copied",
-                    "character", targetCharacter
-            ));
+            Optional<WeeklyCharacter> targetCharacter = weeklyCharacterService.getWeeklyCharacter(userId, weeklyCharacterId);
+
+            return ResponseEntity.ok(weeklyCharacterMapper.toDto(targetCharacter.orElse(null)));
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Failed to copy bosses"));
+            System.err.println("Error duplicating bosses: " + e.getMessage());
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to duplicate bosses: " + e.getMessage()));
         }
     }
 

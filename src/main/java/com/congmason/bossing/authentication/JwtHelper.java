@@ -10,45 +10,47 @@ import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+@Component
 public class JwtHelper {
 
-    private static Key SECRET_KEY;
-
-    public JwtHelper(@Value("${jwt.secret}") String secret) {
-        this.SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
-    }
+    private final Key key;
     private static final int MINUTES = 60;
 
-    public static String generateToken(String email) {
+    public JwtHelper(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }
+
+    public String generateToken(String email) {
         var now = Instant.now();
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plus(MINUTES*24*2, ChronoUnit.MINUTES)))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public static String extractUsername(String token) throws Exception {
+    public String extractUsername(String token) throws Exception {
 
         return getTokenBody(token).getSubject();
     }
 
-    public static Boolean validateToken(String token, UserDetails userDetails) throws Exception {
+    public Boolean validateToken(String token, UserDetails userDetails) throws Exception {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    private static Claims getTokenBody(String token) throws Exception {
+    private Claims getTokenBody(String token) throws Exception {
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -57,7 +59,7 @@ public class JwtHelper {
         }
     }
 
-    private static boolean isTokenExpired(String token) {
+    private  boolean isTokenExpired(String token) {
         Claims claims = null;
         try {
             claims = getTokenBody(token);
