@@ -8,6 +8,8 @@ import com.congmason.bossing.mappers.WeeklyBossMapper;
 import com.congmason.bossing.mappers.WeeklyCharacterMapper;
 import com.congmason.bossing.services.WeeklyBossService;
 import com.congmason.bossing.services.WeeklyCharacterService;
+import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,9 @@ public class WeeklyBossController {
     private final WeeklyCharacterMapper weeklyCharacterMapper;
     private final WeeklyBossService weeklyBossService;
     private final WeeklyBossMapper weeklyBossMapper;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public WeeklyBossController(WeeklyCharacterService weeklyCharacterService, WeeklyCharacterMapper weeklyCharacterMapper, WeeklyBossService weeklyBossService, WeeklyBossMapper weeklyBossMapper) {
         this.weeklyCharacterService = weeklyCharacterService;
@@ -109,12 +114,15 @@ public class WeeklyBossController {
                 copy.setPartySize(sourceBoss.getPartySize());
 
                 WeeklyBoss saved = weeklyBossService.createBoss(weeklyCharacterId, copy);
+
                 copiedBosses.add(saved);
             }
 
-            weeklyCharacterService.updateWeeklyMesos(userId, weeklyCharacterId);
+            entityManager.flush();
+            entityManager.clear();
 
             Optional<WeeklyCharacter> targetCharacter = weeklyCharacterService.getWeeklyCharacter(userId, weeklyCharacterId);
+            weeklyCharacterService.updateWeeklyMesos(userId, targetCharacter.get().getId());
 
             return ResponseEntity.ok(weeklyCharacterMapper.toDto(targetCharacter.orElse(null)));
 
